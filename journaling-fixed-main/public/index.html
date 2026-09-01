@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marginalia — a private journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600&family=Caveat:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* Soft pastel love theme */
+    --bg: #FFF7F5;
+    --surface: #FFFFFF;
+    --surface-alt: #FFF1F2;
+    --ink: #884373;
+    --ink-soft: #B98BB0;
+    --accent: #DB2777;
+    --accent-soft: #FCE7F3;
+    --accent-muted: #FBCFE8;
+    --danger: #BE123C;
+    --line: #FECACA;
+    --line-soft: #FED7D7;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(252, 232, 235, 0.4) 0%, transparent 20%),
+      radial-gradient(circle at 90% 30%, rgba(255, 240, 245, 0.5) 0%, transparent 20%),
+      radial-gradient(circle at 50% 80%, rgba(253, 187, 218, 0.3) 0%, transparent 30%);
+  }
+  .app{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* ---------- Sidebar: spiral-bound notebook edge ---------- */
+  .sidebar{
+    width:340px;
+    flex-shrink:0;
+    background: var(--surface-alt);
+    border-right:1px solid var(--line);
+    padding: 28px 26px 26px 44px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  .sidebar::before{
+    content:"";
+    position:absolute;
+    left:14px; top:0; bottom:0;
+    width:12px;
+    background-image: radial-gradient(circle, var(--bg) 3.5px, transparent 3.6px);
+    background-size: 12px 26px;
+    background-position: 0 14px;
+  }
+  .sidebar::after{
+    content:"💖💕💗💖💕";
+    position:absolute;
+    left:2px; top:10px;
+    font-size:10px;
+    opacity:0.4;
+    transform: rotate(-15deg);
+  }
+  .sidebar::after{
+    content:"";
+    position:absolute;
+    left:20px; top:0; bottom:0;
+    width:1px;
+    background: var(--line);
+  }
+
+  .brand{
+    font-family:'Dancing Script', cursive;
+    font-weight:600;
+    font-size:28px;
+    letter-spacing:-0.01em;
+    margin:0 0 2px;
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, var(--accent) 0%, #ec4899 50%, var(--accent) 100%);
+    position: relative;
+    padding-bottom: 2px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .brand-tag{
+    font-family:'Caveat', cursive;
+    font-size:12px;
+    color: var(--ink-soft);
+    margin:0 0 26px;
+  }
+
+  /* ---------- Auth panel ---------- */
+  .auth-card{
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding:18px;
+  }
+  .tabs{
+    display:flex;
+    gap:2px;
+    margin-bottom:14px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    padding:3px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:7px 0;
+    font-size:13px;
+    font-weight:500;
+    border-radius: 2px;
+    cursor:pointer;
+    color: var(--ink-soft);
+    user-select:none;
+  }
+  .tab.active{
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  }
+  label{
+    display:block;
+    font-family:'Playfair Display', serif;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color: var(--ink-soft);
+    margin: 12px 0 4px;
+  }
+  label:first-of-type{ margin-top:0; }
+  input, select, textarea{
+    width:100%;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color: var(--accent);
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    font-family:'Work Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius: var(--radius);
+    border:1px solid transparent;
+    cursor:pointer;
+    transition: all 0.2s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: linear-gradient(135deg, var(--accent), #ec4899); color:#fff; border: none; box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3); }
+  .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4); }
+  .btn-ghost{ background:transparent; border-color: var(--line-soft); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--accent); color: var(--accent); }
+  .btn-danger{ background:transparent; border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover{ background: var(--danger); color:#fff; }
+  .btn-block{ width:100%; margin-top:16px; }
+  .btn-sm{ padding:6px 10px; font-size:12px; }
+
+  .msg{
+    font-size:12.5px;
+    margin-top:10px;
+    padding:8px 10px;
+    border-radius: var(--radius);
+    display:none;
+    border:1px solid transparent;
+  }
+  .msg.show{ display:block; }
+  .msg.err{ background: #FFF1F1; color: var(--danger); border-color: var(--line-soft); }
+  .msg.ok{ background: #F0FDF4; color: #166534; border-color: #BBF7D0; }
+
+  /* ---------- Session / logged-in state ---------- */
+  .session{ display:none; }
+  .session.show{ display:flex; flex-direction:column; height:100%; }
+  .who{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--surface);
+    border:1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding:12px 14px;
+    margin-bottom:16px;
+  }
+  .who-name{ font-family: 'Dancing Script', cursive; font-weight:600; font-size:16px; color: var(--accent); }
+  .who-label{ font-family:'Caveat', cursive; font-size:11px; color:var(--ink-soft); }
+
+  .search-row{ display:flex; gap:6px; margin-bottom:12px; }
+  .search-row input{ flex:1; }
+
+  .entry-list{
+    flex:1;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .entry-item{
+    background: var(--surface);
+    border:1px solid var(--line-soft);
+    border-left:3px solid var(--accent);
+    border-radius: var(--radius);
+    padding:10px 12px;
+    cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  .entry-item:hover{ border-color: var(--accent); background: var(--surface-alt); }
+  .entry-item.active{ background: var(--accent-soft); }
+  .entry-item-title{ font-family: 'Playfair Display', serif; font-weight:500; font-size:13.5px; margin-bottom:2px; color: var(--ink); }
+  .entry-item-meta{ font-family:'Caveat', cursive; font-size:11px; color: var(--ink-soft); }
+  .entry-list-empty{
+    color: var(--ink-soft);
+    font-family: 'Caveat', cursive;
+    font-size:13px;
+    text-align:center;
+    padding:30px 10px;
+  }
+
+  .new-entry-btn{ margin-top:14px; }
+
+  /* ---------- Main panel ---------- */
+  .main{
+    flex:1;
+    padding:48px 56px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .main-inner{ width:100%; max-width:640px; }
+
+  .empty-state{
+    text-align:center;
+    margin-top:18vh;
+    color: var(--ink-soft);
+  }
+  .empty-state h2{
+    font-family:'Playfair Display', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:24px;
+    color: var(--ink);
+    margin-bottom:8px;
+  }
+
+  .editor{ display:none; }
+  .editor.show{ display:block; }
+
+  .entry-title-input{
+    font-family:'Playfair Display', serif;
+    font-size:28px;
+    font-weight:600;
+    border:none;
+    background:transparent;
+    padding:0;
+    width:100%;
+    color: var(--ink);
+  }
+  .entry-title-input:focus{ outline:none; }
+
+  .entry-meta-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin: 10px 0 22px;
+    font-family:'Caveat', cursive;
+    font-size:11.5px;
+    color: var(--ink-soft);
+  }
+  .mood-select{
+    font-family:'Work Sans', sans-serif;
+    font-size:11.5px;
+    padding:5px 8px;
+    width:auto;
+  }
+
+  .entry-content-input{
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.75;
+    width:100%;
+    min-height:340px;
+    border:none;
+    background:transparent;
+    resize:vertical;
+    padding:0;
+    color: var(--ink);
+  }
+  .entry-content-input:focus{ outline:none; }
+
+  .editor-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    margin-top:24px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+  }
+  .editor-actions .spacer{ flex:1; }
+
+  @media (max-width: 780px){
+    .app{ flex-direction:column; }
+    .sidebar{ width:100%; min-height:auto; padding:22px 20px 20px 34px; }
+    .main{ padding:28px 22px; }
+    .entry-content-input{ min-height:220px; }
+  }
+
+  /* Floating hearts animation */
+  @keyframes floatHeart {
+    0% { transform: translateY(0) scale(1); opacity: 0.5; }
+    50% { transform: translateY(-20px) scale(1.2); opacity: 0.7; }
+    100% { transform: translateY(-40px) scale(1); opacity: 0; }
+  }
+  .floating-hearts{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  .floating-hearts span{
+    position: absolute;
+    font-size: 16px;
+    animation: floatHeart 6s infinite ease-in-out;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <p class="brand">My Love Letters</p>
+    <p class="brand-tag">a private, romantic journal</p>
+
+    <!-- Logged out: auth card -->
+    <div id="authCard" class="auth-card">
+      <div class="tabs">
+        <div class="tab active" data-tab="login">Log in</div>
+        <div class="tab" data-tab="register">Register</div>
+      </div>
+
+      <form id="loginForm">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" required autocomplete="username" />
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" required autocomplete="current-password" />
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      </form>
+
+      <form id="registerForm" style="display:none;">
+        <label for="regName">Name</label>
+        <input id="regName" required />
+        <label for="regUsername">Username</label>
+        <input id="regUsername" required autocomplete="username" />
+        <label for="regPassword">Password</label>
+        <input id="regPassword" type="password" required autocomplete="new-password" />
+        <label for="regGender">Gender</label>
+        <input id="regGender" placeholder="optional" />
+        <label for="regLocation">Location</label>
+        <input id="regLocation" placeholder="optional" />
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+
+      <div id="authMsg" class="msg"></div>
+    </div>
+
+    <!-- Logged in: session + entries -->
+    <div id="session" class="session">
+      <div class="who">
+        <div>
+          <div class="who-label">Signed in as</div>
+          <div class="who-name" id="whoName">—</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+      </div>
+
+      <div class="search-row">
+        <input id="searchInput" placeholder="Search love notes…" />
+        <button class="btn btn-ghost btn-sm" id="searchBtn">Go</button>
+      </div>
+
+      <div class="entry-list" id="entryList">
+        <div class="entry-list-empty">No love notes yet. Write your first one. 💌</div>
+      </div>
+
+      <button class="btn btn-primary btn-block new-entry-btn" id="newEntryBtn">+ New love note</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="empty-state" id="emptyState">
+        <h2>Nothing selected, yet.</h2>
+        <p>Log in and choose a love note, or write a new one.</p>
+      </div>
+
+      <div class="editor" id="editor">
+        <input class="entry-title-input" id="entryTitle" placeholder="Love letter title…" />
+        <div class="entry-meta-row">
+          <span id="entryDate">—</span>
+          <span>·</span>
+          <select class="mood-select" id="entryMood">
+            <option value="Reflective">Reflective</option>
+            <option value="Grateful">Grateful</option>
+            <option value="Happy">Happy</option>
+            <option value="Anxious">Anxious</option>
+            <option value="Tired">Tired</option>
+            <option value="Excited">Excited</option>
+            <option value="Sad">Sad</option>
+          </select>
+        </div>
+        <textarea class="entry-content-input" id="entryContent" placeholder="Write what's on your heart…"></textarea>
+
+        <div class="editor-actions">
+          <button class="btn btn-danger" id="deleteBtn">Delete</button>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <button class="btn btn-primary" id="saveBtn">Save love note</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // Token is kept in memory only (not localStorage) — refreshing the page
+  // will require logging in again. See README for why.
+  const state = {
+    token: null,
+    username: null,
+    entries: [],
+    selectedId: null,
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Tabs (login / register) ----------
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const isLogin = tab.dataset.tab === 'login';
+      $('loginForm').style.display = isLogin ? 'block' : 'none';
+      $('registerForm').style.display = isLogin ? 'none' : 'block';
+      hideAuthMsg();
+    });
+  });
+
+  function showAuthMsg(text, ok){
+    const el = $('authMsg');
+    el.textContent = text;
+    el.className = 'msg show ' + (ok ? 'ok' : 'err');
+  }
+  function hideAuthMsg(){ $('authMsg').className = 'msg'; }
+
+  // ---------- Register ----------
+  $('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAuthMsg();
+    const body = {
+      name: $('regName').value,
+      username: $('regUsername').value,
+      password: $('regPassword').value,
+      gender: $('regGender').value,
+      location: $('regLocation').value,
+    };
+    try{
+      const res = await fetch('/users/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      if(res.ok){
+        showAuthMsg('Account created — you can log in now.', true);
+        document.querySelector('.tab[data-tab="login"]').click();
+        $('loginUsername').value = body.username;
+      } else {
+        showAuthMsg(text, false);
+      }
+    } catch(err){
+      showAuthMsg('Could not reach the server.', false);
+    }
+  });
+
+  // ---------- Login ----------
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAuthMsg();
+    const username = $('loginUsername').value;
+    const password = $('loginPassword').value;
+    try{
+      const res = await fetch('/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if(res.ok && data.jwtToken){
+        state.token = data.jwtToken;
+        state.username = username;
+        enterSession();
+      } else {
+        showAuthMsg(typeof data === 'string' ? data : (data.message || 'Login failed'), false);
+      }
+    } catch(err){
+      showAuthMsg('Could not reach the server.', false);
+    }
+  });
+
+  function enterSession(){
+    $('authCard').style.display = 'none';
+    $('session').classList.add('show');
+    $('whoName').textContent = state.username;
+    loadEntries();
+  }
+
+  $('logoutBtn').addEventListener('click', () => {
+    state.token = null;
+    state.username = null;
+    state.entries = [];
+    state.selectedId = null;
+    $('session').classList.remove('show');
+    $('authCard').style.display = 'block';
+    showEmptyState();
+    $('loginForm').reset();
+    $('loginUsername').value = '';
+  });
+
+  // ---------- Authenticated fetch helper ----------
+  async function authFetch(url, options = {}){
+    const headers = Object.assign({}, options.headers, {
+      'Authorization': 'Bearer ' + state.token,
+    });
+    if(options.body) headers['Content-Type'] = 'application/json';
+    const res = await fetch(url, Object.assign({}, options, { headers }));
+    if(res.status === 401){
+      $('logoutBtn').click();
+      throw new Error('Session expired — please log in again.');
+    }
+    return res;
+  }
+
+  // ---------- Entry list ----------
+  async function loadEntries(query = ''){
+    const q = query ? `?search_q=${encodeURIComponent(query)}` : '';
+    try{
+      const res = await authFetch('/entries/' + q);
+      state.entries = await res.json();
+      renderEntryList();
+    } catch(err){ /* handled by authFetch */ }
+  }
+
+  $('searchBtn').addEventListener('click', () => loadEntries($('searchInput').value));
+  $('searchInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') loadEntries($('searchInput').value); });
+
+  function renderEntryList(){
+    const list = $('entryList');
+    if(!state.entries.length){
+      list.innerHTML = '<div class="entry-list-empty">No love notes yet. Write your first one. 💌</div>';
+      return;
+    }
+    list.innerHTML = '';
+    state.entries.forEach(entry => {
+      const item = document.createElement('div');
+      item.className = 'entry-item' + (entry.entry_id === state.selectedId ? ' active' : '');
+      item.innerHTML = `
+        <div class="entry-item-title">${escapeHtml(entry.title)}</div>
+        <div class="entry-item-meta">${formatDate(entry.date_created)} · ${escapeHtml(entry.mood || '')}</div>
+      `;
+      item.addEventListener('click', () => selectEntry(entry.entry_id));
+      list.appendChild(item);
+    });
+  }
+
+  function selectEntry(id){
+    const entry = state.entries.find(e => e.entry_id === id);
+    if(!entry) return;
+    state.selectedId = id;
+    $('entryTitle').value = entry.title;
+    $('entryContent').value = entry.content;
+    $('entryMood').value = entry.mood || 'Reflective';
+    $('entryDate').textContent = formatDate(entry.date_created);
+    $('deleteBtn').style.display = 'inline-flex';
+    showEditor();
+    renderEntryList();
+  }
+
+  $('newEntryBtn').addEventListener('click', () => {
+    state.selectedId = null;
+    $('entryTitle').value = '';
+    $('entryContent').value = '';
+    $('entryMood').value = 'Reflective';
+    $('entryDate').textContent = 'New love note — not yet saved 💕';
+    $('deleteBtn').style.display = 'none';
+    showEditor();
+    renderEntryList();
+  });
+
+  $('cancelBtn').addEventListener('click', () => {
+    if(state.selectedId){ selectEntry(state.selectedId); }
+    else { showEmptyState(); }
+  });
+
+  // ---------- Save (create or update) ----------
+  $('saveBtn').addEventListener('click', async () => {
+    const title = $('entryTitle').value.trim();
+    const content = $('entryContent').value.trim();
+    const mood = $('entryMood').value;
+    if(!title || !content){ alert('Please add a title and some content to your love note.'); return; }
+
+    try{
+      if(state.selectedId){
+        await authFetch(`/entries/${state.selectedId}/`, {
+          method:'PUT',
+          body: JSON.stringify({ title, content, mood }),
+        });
+      } else {
+        await authFetch('/entries/', {
+          method:'POST',
+          body: JSON.stringify({ title, content, mood }),
+        });
+      }
+      await loadEntries();
+      showEmptyState();
+    } catch(err){ /* handled by authFetch */ }
+  });
+
+  // ---------- Delete ----------
+  $('deleteBtn').addEventListener('click', async () => {
+    if(!state.selectedId) return;
+    if(!confirm('Delete this love note? This cannot be undone.')) return;
+    try{
+      await authFetch(`/entries/${state.selectedId}/`, { method:'DELETE' });
+      state.selectedId = null;
+      await loadEntries();
+      showEmptyState();
+    } catch(err){ /* handled by authFetch */ }
+  });
+
+  function showEditor(){
+    $('emptyState').style.display = 'none';
+    $('editor').classList.add('show');
+  }
+  function showEmptyState(){
+    $('editor').classList.remove('show');
+    $('emptyState').style.display = 'block';
+    state.selectedId = null;
+  }
+
+  function formatDate(iso){
+    if(!iso) return '—';
+    const d = new Date(iso.replace(' ', 'T') + 'Z');
+    if(isNaN(d)) return iso;
+    return d.toLocaleString(undefined, { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // Floating hearts animation
+  function createFloatingHearts(){
+    const container = document.createElement('div');
+    container.className = 'floating-hearts';
+    document.body.appendChild(container);
+    const hearts = ['💗', '💕', '💖', '💘', '💝', '💓'];
+    for(let i = 0; i < 12; i++){
+      const heart = document.createElement('span');
+      heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.top = Math.random() * 100 + 'vh';
+      heart.style.animationDelay = Math.random() * 4 + 's';
+      heart.style.fontSize = (12 + Math.random() * 8) + 'px';
+      container.appendChild(heart);
+    }
+  }
+  createFloatingHearts();
+</script>
+
+</body>
+</html>
