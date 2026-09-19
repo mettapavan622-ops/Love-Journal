@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const jwtSecret = process.env.JWT_SECRET;
 
 // Verifies the JWT token sent in the Authorization header.
 // On success, attaches the decoded user info to the request object
@@ -15,7 +16,7 @@ const authenticateToken = (request, response, next) => {
     response.status(401);
     response.send("Invalid JWT Token");
   } else {
-    jwt.verify(jwtToken, "MY_SECRET_TOKEN", async (error, payload) => {
+    jwt.verify(jwtToken, jwtSecret, (error, payload) => {
       if (error) {
         response.status(401);
         response.send("Invalid JWT Token");

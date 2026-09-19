@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: love-journal
+    runtime: node
+    rootDir: journaling-fixed-main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_PATH
+        value: /var/data/journal.db
+    disk:
+      name: love-journal-data
+      mountPath: /var/data
+      sizeGB: 1
