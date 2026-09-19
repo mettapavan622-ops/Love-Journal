@@ -55,6 +55,14 @@ Server runs at `http://localhost:3000/` — open that URL in a browser to use th
 - The JWT is kept in an in-memory JS variable, not `localStorage`, so refreshing the page logs you out. Swap in `localStorage`/cookies if you want persistence across reloads.
 - All entry requests go through the `authFetch()` helper, which attaches the `Authorization: Bearer <token>` header and auto-logs-out on a 401.
 
+## Deploy to Render
+
+This repository includes `render.yaml` for a Node web service backed by a
+persistent 1 GB disk. In Render, choose **New > Blueprint**, connect this
+repository, and apply the blueprint. Render builds from `journaling-fixed-main`,
+generates `JWT_SECRET`, stores SQLite data at `/var/data/journal.db`, and uses
+`/healthz` for health checks.
+
 ## API Reference
 
 ### Auth
@@ -98,6 +106,6 @@ After starting the server, open [http://localhost:3000](http://localhost:3000) i
 
 ## Notes
 - Passwords are hashed with `bcrypt` before storage — never stored in plain text.
-- JWT secret is hardcoded as `"MY_SECRET_TOKEN"` for learning purposes — move this to an environment variable (`.env`) before deploying anywhere real.
+- `JWT_SECRET` is required at startup and should remain private.
 - Every entry route is scoped to `request.userId` from the verified token, so users can only ever see or modify their own entries.
-- SQL queries here use string interpolation for readability/teaching purposes; for production, switch to parameterized queries (`db.all(query, [param1, param2])`) to prevent SQL injection.
+- SQL values use parameterized queries; sort fields and directions are allowlisted.
